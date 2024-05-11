@@ -3,34 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='stylelogin.css') }}">
+    <title>Sign Up</title>
 </head>
 <body>
-    <h1>Register</h1>
-    {% with messages = get_flashed_messages() %}
-        {% if messages %}
-            <ul>
-                {% for message in messages %}
-                    <li>{{ message }}</li>
-                {% endfor %}
-            </ul>
-        {% endif %}
-    {% endwith %}
-    <form action="/register" method="post">
-        <label for="site_id">Site ID:</label><br>
-        <input type="text" id="site_id" name="site_id" required><br><br>
-        
-        <label for="site_password">Site Password:</label><br>
-        <input type="password" id="site_password" name="site_password" required><br><br>
-        
-        <label for="smtp_email">SMTP Email:</label><br>
-        <input type="email" id="smtp_email" name="smtp_email" required><br><br>
-        
-        <label for="smtp_password">SMTP Password:</label><br>
-        <input type="password" id="smtp_password" name="smtp_password" required><br><br>
-        
-        <input type="submit" value="Register">
+    <!--ring div starts here-->
+<div class="ring">
+    <i style="--clr:#00ff0a;"></i>
+    <i style="--clr:#ff0057;"></i>
+    <i style="--clr:#fffd44;"></i>
+    <style>
+        .error-message {
+            color: white; /* 오류 메시지의 텍스트 색상을 하얀색으로 설정 */
+        }
+
+        .sign-in-button {
+            background-color: rgb(162, 0, 255); /* 버튼의 배경색을 노란색으로 설정 */
+            color: black; /* 버튼 텍스트 색상을 검정색으로 설정 */
+            padding: 10px 20px; /* 버튼의 패딩 설정 */
+            text-decoration: none; /* 링크에 밑줄 제거 */
+            border-radius: 5px; /* 버튼의 모서리를 둥글게 설정 */
+        }
+    </style>
+    <div class="login">
+      <h2>Register</h2>
+      {% if error_message %}
+      <div class="error-message">{{ error_message }}</div>
+      {% endif %}
+      <form action="/register" method="post">
+      <div class="inputBx">
+        <input type="text" id="site_id" name="site_id" placeholder="Username" required><br><br>
+      </div>
+      <div class="inputBx">
+        <input type="password" id="site_password" name="site_password" placeholder="Password" required><br><br>
+      </div>
+      <div class="inputBx">
+        <input type="email" id="smtp_email" name="smtp_email" placeholder="Gmail" required><br><br>
+      </div>
+      <div class="inputBx">
+        <input type="password" id="smtp_password" name="smtp_password" placeholder="App Password" required><br><br>
+      </div>
+      <div class="inputBx">
+        <input type="submit" value="Register"> <br><br>
+      </div>
+      <div class="links">
+        <a href="{{ url_for('login') }}" class="sign-in-button">Sign In</a>
+      </div>
     </form>
-    <p>Already have an account? <a href="{{ url_for('login') }}">Login here</a></p>
+  </div>
+</div>
+<!--ring div ends here-->
 </body>
 </html>

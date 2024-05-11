@@ -1,0 +1,32 @@
+body {
+    font-family: Arial, sans-serif;
+    background: radial-gradient(circle, rgba(255, 0, 0, 0.1) 0%, rgba(255, 0, 0, 0.2) 50%, rgba(255, 0, 0, 0.3) 100%);
+    background-size: cover;
+    background-attachment: fixed;
+    display: flex;
+    justify-content: center; /* 수평 가운데 정렬 */
+    align-items: center; /* 수직 가운데 정렬 */
+    height: 100vh; /* 화면 전체 높이 */
+    margin: 0;
+}
+
+.container {
+    background-color: rgba(255, 255, 255, 0.8); /* 투명도 조절 */
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+}
+
+.email {
+    border: 1px solid #ccc;
+    margin-bottom: 10px;
+    padding: 10px;
+}
+
+.email h3 {
+    margin-top: 0;
+}
+
+.email p {
+    margin-bottom: 0;
+}

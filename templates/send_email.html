@@ -92,7 +92,9 @@
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             position: relative; /* 추가된 부분 */
             z-index: 1; /* 추가된 부분 */
+            text-align: center;
         }
+
 
         label {
             font-weight: bold;
@@ -149,7 +151,10 @@
             text-decoration: underline;
         }
 
-        /* 추가한 CSS */
+        .parent-element {
+            text-align: center;
+        }
+
         .glow-on-hover {
             width: 220px;
             height: 50px;
@@ -162,6 +167,7 @@
             z-index: 0;
             border-radius: 10px;
             margin-top: 20px;
+            text-align: center;
         }
 
         .glow-on-hover:before {
@@ -221,20 +227,24 @@
 
     <h1>Send Email</h1>
     <form action="/send_email" method="post">
-        <label for="receiver_email">Receiver Email:</label><br>
+        <label for="receiver_email">받는 사람 이메일:</label><br>
         <input type="email" id="receiver_email" name="receiver_email" required><br><br>
         
-        <label for="subject">Subject:</label><br>
+        <label for="subject">제목:</label><br>
         <input type="text" id="subject" name="subject" required><br><br>
         
-        <label for="message">Message:</label><br>
+        <label for="message">메시지:</label><br>
         <textarea id="message" name="message" rows="4" cols="50" required></textarea><br><br>
-
-        <button class="glow-on-hover" type="submit">Send Email</button>
+    
+        <input type="checkbox" id="anonymous" name="anonymous">
+        <label for="anonymous">익명으로 보내기</label><br><br>
+    
+        <button class="glow-on-hover" type="submit">이메일 보내기</button>
+        <div class="logout-link">
+            <a href="{{ url_for('logout') }}">로그아웃</a>
+        </div>
     </form>
-    <div class="logout-link">
-        <a href="{{ url_for('logout') }}">Logout</a>
-    </div>
+    
 
 </body>
 </html>

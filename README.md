@@ -18,7 +18,6 @@ pip3 install flask_login
 ```
 python3 main.py
 ```
-<img width="870" alt="Screenshot 2024-06-01 at 10 51 58 AM" src="https://github.com/Vladimir-Agyky/GoogleSmtpSender/assets/85668871/3ed9431c-1614-4e05-a0c1-61508e98b7bc">
 
 
 

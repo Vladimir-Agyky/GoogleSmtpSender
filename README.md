@@ -13,11 +13,17 @@ pip3 install flask
 pip3 install email
 ```
 ```
+pip3 install flask_login
+```
+```
 python3 main.py
 ```
+<img width="870" alt="Screenshot 2024-06-01 at 10 51 58 AM" src="https://github.com/Vladimir-Agyky/GoogleSmtpSender/assets/85668871/3ed9431c-1614-4e05-a0c1-61508e98b7bc">
+
+
 
 # How to use?
-<img width="172" alt="SCR-20240406-lbhd" src="https://github.com/Vladimir-Agyky/GoogleSmtpSender/assets/85668871/2d644f38-9380-4bec-98a2-2560fbd8d50d"> <br>
+<img width="870" alt="Screenshot 2024-06-01 at 10 51 58 AM" src="https://github.com/Vladimir-Agyky/GoogleSmtpSender/assets/85668871/fc029183-f8ce-42d7-8d6b-0bd36d231160"> <br>
 Site ID : Whatever you want <br>
 SITE Pw : whatever you want <br>
 Smtp email : your google email <br>

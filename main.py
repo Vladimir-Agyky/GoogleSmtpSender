@@ -3,15 +3,18 @@ import imaplib
 from email.parser import BytesParser
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from email.header import decode_header
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 import html
+import chardet
 
 app = Flask(__name__)
 app.secret_key = 'SaltySalt09@'  # 암호화를 위한 시크릿 키 설정
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
+
 db = SQLAlchemy(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -23,6 +26,10 @@ class User(UserMixin, db.Model):
     site_password = db.Column(db.String(100), nullable=False)
     smtp_email = db.Column(db.String(100), nullable=False)
     smtp_password = db.Column(db.String(100), nullable=False)
+
+with app.app_context():
+    db.create_all()
+    print("Database and tables created")
 
 # 로그인 관련 설정
 @login_manager.user_loader
@@ -91,8 +98,8 @@ def send_email():
         # 익명으로 보내기 체크되었는지 확인
         if anonymous:
             # 익명으로 보내기일 경우 미리 저장된 SMTP 자격 증명 사용
-            smtp_email = ""  # 미리 저장된 SMTP 이메일
-            smtp_password = ""  # 미리 저장된 SMTP 비밀번호
+            smtp_email = "unknownsender6974@gmail.com"  # 미리 저장된 SMTP 이메일
+            smtp_password = "fuptjkgqqovttuum"  # 미리 저장된 SMTP 비밀번호
         else:
             # 익명으로 보내지 않을 경우 현재 사용자의 SMTP 자격 증명 사용
             smtp_email = current_user.smtp_email
@@ -137,10 +144,16 @@ def send_email():
     return render_template('send_email.html', messages=messages)
 
 
+from flask import render_template
+from flask_login import login_required, current_user
+import imaplib
+import chardet
+from email.parser import BytesParser
+from email.header import decode_header
+
 @app.route('/inbox')
 @login_required
 def inbox():
-    # SMTP 이메일 가져오기
     smtp_email = current_user.smtp_email
     smtp_password = current_user.smtp_password
 
@@ -150,45 +163,61 @@ def inbox():
 
     _, message_numbers = imap_server.search(None, 'ALL')
     messages = []
-
-    for num in message_numbers[0].split():
+    messages_list = message_numbers[0].split()
+    messages_list.reverse()  # 최신꺼를 위로 올리기
+    if len(messages_list) > 20:
+        messages_list = messages_list[:20]  # 띄울 개수
+    print(messages_list)
+    
+    for num in messages_list:
         _, data = imap_server.fetch(num, '(RFC822)')
         msg = BytesParser().parsebytes(data[0][1])
         body = None
         
-        # 이메일이 복합 형식인지 확인
+        # Decode the subject
+        subject, encoding = decode_header(msg['subject'])[0]
+        if isinstance(subject, bytes):
+            subject = subject.decode(encoding or 'utf-8', errors='replace')
+        
         if msg.is_multipart():
             for part in msg.walk():
                 content_type = part.get_content_type()
-                if content_type == "text/plain":
-                    # 텍스트 본문을 가져옴
-                    body = part.get_payload(decode=True).decode('utf-8')
-                    break  # 텍스트 본문을 찾으면 반복문 종료
-                elif content_type == "text/html":
-                    # HTML 본문도 있는 경우 텍스트 본문으로 처리
-                    body = part.get_payload(decode=True).decode('utf-8')
+                content_disposition = str(part.get('Content-Disposition'))
+
+                if 'attachment' in content_disposition:
+                    continue
+                
+                if content_type == 'text/plain':
+                    payload = part.get_payload(decode=True)
+                    encoding = part.get_content_charset()
+                    if encoding is None:
+                        result = chardet.detect(payload)
+                        encoding = result['encoding']
+                    body = payload.decode(encoding, errors='replace')
+                    break
+                elif content_type == 'text/html':
+                    payload = part.get_payload(decode=True)
+                    encoding = part.get_content_charset()
+                    if encoding is None:
+                        result = chardet.detect(payload)
+                        encoding = result['encoding']
+                    body = payload.decode(encoding, errors='replace')
         else:
-            # 단일 형식의 본문인 경우 바로 가져옴
-            body = msg.get_payload(decode=True).decode('utf-8') if msg.get_payload(decode=True) else ""
-
-    # 본문이 존재하는지 확인하여 처리
-    if body:
+            payload = msg.get_payload(decode=True)
+            encoding = msg.get_content_charset()
+            if encoding is None:
+                result = chardet.detect(payload)
+                encoding = result['encoding']
+            body = payload.decode(encoding, errors='replace') if payload else ""
+        
+        print(subject)
         messages.append({
-            'subject': msg['subject'],
+            'subject': subject,
             'from': msg['from'],
             'date': msg['date'],
-            'body': body
-        })
-    else:
-        messages.append({
-            'subject': msg['subject'],
-            'from': msg['from'],
-            'date': msg['date'],
-            'body': "No Body Contents"
+            'body': body if body else "No Body Contents"
         })
 
-
-    # IMAP 서버 연결 종료
     imap_server.close()
     imap_server.logout()
     return render_template('inbox.html', messages=messages)

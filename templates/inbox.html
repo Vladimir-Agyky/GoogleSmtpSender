@@ -1,36 +1,58 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Email Inbox</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styleinbox.css') }}"> <!-- 새로운 CSS 파일 추가 -->
-</head>
-<body>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='styleinbox.css') }}"
+    />
+    <!-- 새로운 CSS 파일 추가 -->
+    <style>
+      .refresh-button {
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        cursor: pointer;
+        border-radius: 5px;
+        font-size: 16px;
+      }
+    </style>
+  </head>
+  <body>
     <div class="container">
-        <h1>Email Inbox</h1>
-        {% if messages %}
-            {% for message in messages %}
-                <div class="email">
-                    <h3>{{ message.subject }}</h3>
-                    <p><strong>From:</strong> {{ message.from }}</p>
-                    <p><strong>Date:</strong> {{ message.date }}</p>
-                    <p><strong>Body:</strong> 
-                    {% if message.body %}
-                        {% if message.body|length > 0 %}
-                            {{ message.body|safe }}
-                        {% else %}
-                            No body content
-                        {% endif %}
-                    {% else %}
-                        No body content
-                    {% endif %}
-                    </p>
-                </div>
-            {% endfor %}
-        {% else %}
-            <p>No emails found.</p>
-        {% endif %}
+      <h1>Email Inbox</h1>
+      <button class="refresh-button" onclick="location.href='/update'">
+        Refresh
+      </button>
+      {% if messages %} {% for message in messages %}
+      <div class="email">
+        <h3>{{ message.subject }}</h3>
+        <p><strong>From:</strong> {{ message.from }}</p>
+        <p><strong>Date:</strong> {{ message.date }}</p>
+        <p>
+          <strong>Body:</strong>
+          {% if message.body %} {% if message.body|length > 0 %} {{
+          message.body|safe }} {% else %} No body content {% endif %} {% else %}
+          No body content {% endif %}
+        </p>
+      </div>
+      {% endfor %} {% else %}
+      <p>No emails found.</p>
+      {% endif %}
     </div>
-</body>
+
+    <!-- JavaScript 코드 직접 포함 -->
+    <script>
+      // JavaScript 코드 작성
+      document.addEventListener('DOMContentLoaded', function () {
+        console.log('Document loaded!');
+      });
+    </script>
+  </body>
 </html>

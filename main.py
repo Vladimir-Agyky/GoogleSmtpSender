@@ -27,6 +27,13 @@ class User(UserMixin, db.Model):
     smtp_email = db.Column(db.String(100), nullable=False)
     smtp_password = db.Column(db.String(100), nullable=False)
 
+class Email(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    subject = db.Column(db.String(255), nullable=False)
+    from_name = db.Column(db.String(255), nullable=False)
+    date = db.Column(db.String(255), nullable=False)
+    body = db.Column(db.Text, nullable=False)
+
 with app.app_context():
     db.create_all()
     print("Database and tables created")
@@ -144,16 +151,9 @@ def send_email():
     return render_template('send_email.html', messages=messages)
 
 
-from flask import render_template
-from flask_login import login_required, current_user
-import imaplib
-import chardet
-from email.parser import BytesParser
-from email.header import decode_header
-
-@app.route('/inbox')
+@app.route('/update')
 @login_required
-def inbox():
+def update_mail():
     smtp_email = current_user.smtp_email
     smtp_password = current_user.smtp_password
 
@@ -169,6 +169,10 @@ def inbox():
         messages_list = messages_list[:20]  # 띄울 개수
     print(messages_list)
     
+    # 기존 Email 테이블 데이터 삭제
+    Email.query.delete()
+    db.session.commit()
+
     for num in messages_list:
         _, data = imap_server.fetch(num, '(RFC822)')
         msg = BytesParser().parsebytes(data[0][1])
@@ -215,18 +219,35 @@ def inbox():
                 encoding = result['encoding']
             body = payload.decode(encoding, errors='replace') if payload else ""
         
-        
-        
-        
-        messages.append({
-            'subject': subject,
-            'from': from_name,
-            'date': msg['date'],
-            'body': body if body else "No Body Contents"
-        })
-
+        # 이메일 정보를 데이터베이스에 저장
+        email = Email(
+            subject=subject,
+            from_name=from_name,
+            date=msg['date'],
+            body=body if body else "No Body Contents"
+        )
+        db.session.add(email)
+        db.session.commit()
     imap_server.close()
     imap_server.logout()
+    return redirect(url_for('inbox'))
+
+
+
+@app.route('/inbox')
+@login_required
+def inbox():
+    emails = Email.query.all()
+
+    messages = []
+    for email in emails:
+        messages.append({
+            'subject': email.subject,
+            'from': email.from_name,
+            'date': email.date,
+            'body': email.body if email.body else "No Body Contents"
+        })
+
     return render_template('inbox.html', messages=messages)
 
 if __name__ == '__main__':

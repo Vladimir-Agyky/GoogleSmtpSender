@@ -179,6 +179,11 @@ def inbox():
         if isinstance(subject, bytes):
             subject = subject.decode(encoding or 'utf-8', errors='replace')
         
+        
+        from_name, encoding = decode_header(msg['from'].replace('"', ''))[0]
+        if isinstance(from_name, bytes):
+            from_name = from_name.decode(encoding or 'utf-8', errors='replace')
+
         if msg.is_multipart():
             for part in msg.walk():
                 content_type = part.get_content_type()
@@ -210,10 +215,12 @@ def inbox():
                 encoding = result['encoding']
             body = payload.decode(encoding, errors='replace') if payload else ""
         
-        print(subject)
+        
+        
+        
         messages.append({
             'subject': subject,
-            'from': msg['from'],
+            'from': from_name,
             'date': msg['date'],
             'body': body if body else "No Body Contents"
         })

@@ -1,15 +1,18 @@
 import smtplib
 import imaplib
+from email import encoders
+from email.header import decode_header
 from email.parser import BytesParser
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from email.header import decode_header
+from email.mime.base import MIMEBase
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
-import html
 import chardet
+import os, mimetypes
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 app.secret_key = 'SaltySalt09@'  # 암호화를 위한 시크릿 키 설정
@@ -92,23 +95,36 @@ def logout():
 @app.route('/send_email', methods=['GET', 'POST'])
 @login_required
 def send_email():
-    messages = []  # 이 부분에서 messages 변수를 먼저 정의합니다.
+    messages = []
     if request.method == 'POST':
         receiver_email = request.form['receiver_email']
         subject = request.form['subject']
         message = request.form['message']
-        anonymous = request.form.get('anonymous')  # Check if anonymous checkbox is checked
+        anonymous = request.form.get('anonymous')
 
-        # 이메일 내용
+        attachment = request.files['file']
+        if attachment:
+            filename = secure_filename(attachment.filename)
+            file_path = os.path.join(app.root_path, 'uploads', filename)
+            attachment.save(file_path)
+
+            mime_type, _ = mimetypes.guess_type(filename)
+            if mime_type is None:
+                mime_type = 'application/octet-stream'
+                
+            # 첨부 파일 MIME 형식으로 변환
+            part = MIMEBase(*mime_type.split('/', 1))
+            with open(file_path, 'rb') as f:
+                part.set_payload(f.read())
+            encoders.encode_base64(part)
+            part.add_header('Content-Disposition', f'attachment; filename= {filename}')
+
+
         msg = MIMEMultipart()
-        
-        # 익명으로 보내기 체크되었는지 확인
         if anonymous:
-            # 익명으로 보내기일 경우 미리 저장된 SMTP 자격 증명 사용
-            smtp_email = "unknownsender6974@gmail.com"  # 미리 저장된 SMTP 이메일
-            smtp_password = "fuptjkgqqovttuum"  # 미리 저장된 SMTP 비밀번호
+            smtp_email = "unknownsender6974@gmail.com" 
+            smtp_password = "fuptjkgqqovttuum"
         else:
-            # 익명으로 보내지 않을 경우 현재 사용자의 SMTP 자격 증명 사용
             smtp_email = current_user.smtp_email
             smtp_password = current_user.smtp_password
 
@@ -116,38 +132,24 @@ def send_email():
         msg['To'] = receiver_email
         msg['Subject'] = subject
         msg.attach(MIMEText(message, 'plain'))
+        if attachment:
+            msg.attach(part)
 
-        # SMTP 서버 설정
-        smtp_server = smtplib.SMTP('smtp.gmail.com', 587)
-        smtp_server.starttls()
-        smtp_server.login(smtp_email, smtp_password)
-        imap_server = imaplib.IMAP4_SSL('imap.gmail.com')
-        imap_server.login(smtp_email, smtp_password)
-        imap_server.select('inbox')
+        # SMTP 서버 설정 및 전송
+        try:
+            smtp_server = smtplib.SMTP('smtp.gmail.com', 587)
+            smtp_server.starttls()
+            smtp_server.login(smtp_email, smtp_password)  
 
-        _, message_numbers = imap_server.search(None, 'ALL')
-
-        for num in message_numbers[0].split():
-            _, data = imap_server.fetch(num, '(RFC822)')
-            msg = BytesParser().parsebytes(data[0][1])
-            body = msg.get_payload(decode=True).decode('utf-8') if msg.get_payload(decode=True) else "" # 본문 가져오기
-            messages.append({
-                'subject': msg['subject'],
-                'from': msg['from'],
-                'date': msg['date'],
-                'body': body
-            })
-
-        # IMAP 서버 연결 종료
-        imap_server.close()
-        imap_server.logout()
-
-        # 이메일 전송
-        smtp_server.send_message(msg)
-        smtp_server.quit()
-
-        flash('이메일 전송 성공!')
+            smtp_server.send_message(msg)
+            flash('이메일 전송 성공!')
+            return redirect(url_for('send_email'))
+        except Exception as e:
+            messages.append(f"이메일 전송 중 오류가 발생했습니다: {e}")
+        finally:
+            smtp_server.quit()
         return redirect(url_for('send_email'))
+    
     return render_template('send_email.html', messages=messages)
 
 

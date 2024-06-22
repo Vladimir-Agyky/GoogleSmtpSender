@@ -1,5 +1,5 @@
 # Google Smtp Sender Flask
-![SCR-20240406-kwuz](https://github.com/Vladimir-Agyky/GoogleSmtpSender/assets/85668871/6be4d8ac-dc99-4762-9b00-088d6f31b7b0)
+<img width="1680" alt="Screenshot 2024-06-22 at 11 16 45 AM" src="https://github.com/Vladimir-Agyky/GoogleSmtpSender/assets/85668871/9c9ff9df-a29d-493e-ad4a-d4a1183282fc">
 
 # Before Installation
 You need to enable smtp/imap in gmail <br>
@@ -18,6 +18,9 @@ pip3 install flask_login
 ```
 python3 main.py
 ```
+
+<img width="1680" alt="Screenshot 2024-06-22 at 11 16 31 AM" src="https://github.com/Vladimir-Agyky/GoogleSmtpSender/assets/85668871/261a72ea-bc48-47f2-80c0-fce605e197c8">
+Working mechanism -> Press refresh button -> Imap api will get your inbox -> cache in to DB -> website will read DB and show on website
 
 
 
